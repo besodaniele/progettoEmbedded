@@ -107,9 +107,9 @@ int mutex_unlock(pthread_mutex_t *lock)
     }
 }
 
-int create_task(task_t *task)
+int create_task(task_t *task, void* args)
 {
-    if (pthread_create(&(task->tid), NULL, task->entry_point, NULL) != 0)
+    if (pthread_create(&(task->tid), NULL, task->entry_point, args) != 0)
     {
         return (1);
     }

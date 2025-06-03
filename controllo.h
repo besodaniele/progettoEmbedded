@@ -2,10 +2,9 @@
 #include <stdlib.h>
 //#include <pigpio.h>
 #include <math.h>
-#include "../libcoderbot/include/motor.h"
-#include "../libcoderbot/include/cbdef.h"
-#include "../libcoderbot/include/encoder.h"
-#include "timer.h"
+#include "libcoderbot/include/motor.h"
+#include "libcoderbot/include/cbdef.h"
+#include "libcoderbot/include/encoder.h"
 #include "concurrent.h"
 #define _USE_MATH_DEFINES
 
@@ -36,8 +35,21 @@ float clamp(float dutyCycle){
 	else return dutyCycle;
 }
 
-void controllo(float goal_mm, float targetSpeed_mm_s, float dutyCycle, cbMotor_t motor, cbEncoder_t encoder){
-	
+typedef struct {
+	float goal_mm;
+	float targetSpeed_mm_s;
+	float dutyCycle;
+	cbMotor_t motor;
+	cbEncoder_t encoder;
+} controllo_args_t;
+
+void controllo(void *args){
+	controllo_args_t *controlArgs = (controllo_args_t *)args;
+    float goal_mm = controlArgs->goal_mm;
+    cbMotor_t motor = controlArgs->motor;
+    float dutyCycle = controlArgs->dutyCycle;
+	float targetSpeed_mm_s = controlArgs->targetSpeed_mm_s;
+	cbEncoder_t encoder = controlArgs->encoder;
     //set_sched_deadline(80*1000,15*1000,200*1000);
     // da stabilire i valori
 
@@ -67,21 +79,11 @@ void controllo(float goal_mm, float targetSpeed_mm_s, float dutyCycle, cbMotor_t
 
 		erroreAccumulatoL += error; //sorrenti dice che nell'integrale va considerato l'errore corrente, non so quanto mi convince
 		
-		/*
-		
-		se errore negativo muovo backward?
-		dovrei usare la stessa costante 
-		si può generare un'oscillazione, ma l'errore dovrebbe essere poi grosso e quindi riportare a un movimento in avanti
-
-		*/
-
 		newDutyCycle = KP*error + KI*erroreAccumulatoL;
 		newDutyCycle = fabs(newDutyCycle);
 
 		//controllo saturazione
 		newDutyCycle = clamp(newDutyCycle);
-
-
 		// se errore positivo -> troppo lento
 		// se error negativo -> troppo veloce
 
@@ -92,9 +94,7 @@ void controllo(float goal_mm, float targetSpeed_mm_s, float dutyCycle, cbMotor_t
 			newDutyCycle = newDutyCycle *0.1f;
 			newDutyCycle = clamp(newDutyCycle);
 		}
-		
 		cbMotorMove(&motor, direction, newDutyCycle);
-
 		goal_mm -= travelledDistance;
         pthread_testcancel();
         sched_yield(); //segnalo allo scheduler che ho finito
