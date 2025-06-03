@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 //#include <pigpio.h>
-#include <math.h>
 #include "libcoderbot/include/motor.h"
 #include "libcoderbot/include/cbdef.h"
 #include "libcoderbot/include/encoder.h"
 #include "concurrent.h"
 #define _USE_MATH_DEFINES
+#include <math.h>
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846
+#endif
 
 #define KP 0.005f//da trovare
 #define KI 0.0005f//da trovare
