@@ -35,15 +35,17 @@ float clamp(float dutyCycle){
 	} 
 	if (dutyCycle > 1.0f) {
 		clamp_counter++;
+		mutex_unlock(&clamp_mutex);
 		return 1.0f;
 	}
 	else if (dutyCycle < 0.0f){
 		clamp_counter++;
+		mutex_unlock(&clamp_mutex);
 		return 0.1f;
 	}
 
 	mutex_unlock(&clamp_mutex);
-	else return dutyCycle;
+	return dutyCycle;
 }
 
 typedef struct {
