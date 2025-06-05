@@ -6,7 +6,6 @@
 #include "odometria.h"
 
 
-int clamp_counter = 0;
 pthread_mutex_t clamp_mutex = PTHREAD_MUTEX_INITIALIZER;    //inizializzo clamp_mutex
 
 cbMotor_t motorL = {PIN_LEFT_FORWARD, PIN_LEFT_BACKWARD, forward};
@@ -26,6 +25,8 @@ void init(){
 	cbMotorGPIOinit(&motorR);
 	cbEncoderGPIOinit(&encoderR);
 	cbEncoderRegisterISRs(&encoderR, 50);
+
+
 }
 void kill() {
     cbMotorReset(&motorL);
@@ -55,12 +56,17 @@ int main(){
         .encoder = encoderR
     };
     
+    clamp_counter = 0;
     odometria_args_t odom_args = {
         .encoder_left = encoderL,
         .encoder_right = encoderR
     };
     task_t odom = {.entry_point=odometria};
-
+    
+    if (mutex_init(&clamp_mutex) != 0) {
+        failure("Failed to initialize clamp mutex");
+    }
+    
     if(create_task(&odom, (void*)&odom_args)!=0){
         failure("Failed to create odometry task");
     }
