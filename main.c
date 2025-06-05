@@ -4,6 +4,11 @@
 #include "libcoderbot/include/encoder.h"
 #include "controllo.h"
 #include "odometria.h"
+
+
+int clamp_counter = 0;
+pthread_mutex_t clamp_mutex = PTHREAD_MUTEX_INITIALIZER;    //inizializzo clamp_mutex
+
 cbMotor_t motorL = {PIN_LEFT_FORWARD, PIN_LEFT_BACKWARD, forward};
 cbMotor_t motorR = {PIN_RIGHT_FORWARD, PIN_RIGHT_BACKWARD, forward};
 

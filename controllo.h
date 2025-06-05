@@ -23,10 +23,16 @@
 #define TRANSMISSION_RATIO 120
 const float mmsPerTick = (WHEEL_RAY_MM * 2 * M_PI) / (TICKS_PER_REVOLUTION * TRANSMISSION_RATIO);
 
-extern int clamp_counter = 0; //incrementata da entrambi i task del controllo dei motori, da proteggere con mutex
+extern int clamp_counter /*= 0*/; //incrementata da entrambi i task del controllo dei motori, da proteggere con mutex
+extern pthread_mutex_t clamp_mutex;	//mutex di clamp counter
 
 float clamp(float dutyCycle){
-	if (clamp_counter>=CLAMP_LIMIT) exit(EXIT_FAILURE);
+	mutex_lock(&clamp_mutex);
+
+	if (clamp_counter>=CLAMP_LIMIT){
+		mutex_unlock(&clamp_mutex);
+		exit(EXIT_FAILURE);
+	} 
 	if (dutyCycle > 1.0f) {
 		clamp_counter++;
 		return 1.0f;
@@ -35,6 +41,8 @@ float clamp(float dutyCycle){
 		clamp_counter++;
 		return 0.1f;
 	}
+
+	mutex_unlock(&clamp_mutex);
 	else return dutyCycle;
 }
 
