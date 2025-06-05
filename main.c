@@ -56,12 +56,26 @@ int main(){
     };
     task_t odom = {.entry_point=odometria};
 
-    create_task(&odom, (void*)&odom_args);
-    create_task(&controlloL, (void*)&argsL);
-    create_task(&controlloR, (void*)&argsR);
-    join_task(&controlloL);
-    join_task(&controlloR);
-    cancel_task(&odom);
+    if(create_task(&odom, (void*)&odom_args)!=0){
+        failure("Failed to create odometry task");
+    }
+    if(create_task(&controlloL, (void*)&argsL)!=0){
+        failure("Failed to create left control task");
+    }
+    if(create_task(&controlloR, (void*)&argsR)!=0){
+        failure("Failed to create right control task");
+    }
+    // Attendo il completamento dei task di controllo
+    // e cancello il task di odometria
+    if (join_task(&controlloL) != 0) {
+        failure("Failed to join left control task");
+    }
+    if (join_task(&controlloR) != 0) {
+        failure("Failed to join right control task");
+    }
+    if (cancel_task(&odom) != 0) {
+        failure("Failed to cancel odometry task");
+    }
     
 }
 
