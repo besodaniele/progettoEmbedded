@@ -56,7 +56,7 @@ typedef struct {
 	cbEncoder_t encoder;
 } controllo_args_t;
 
-void controllo(void *args){
+void* controllo(void *args){
 	controllo_args_t *controlArgs = (controllo_args_t *)args;
     float goal_mm = controlArgs->goal_mm;
     cbMotor_t motor = controlArgs->motor;

@@ -28,17 +28,21 @@ void init(){
 
 
 }
-void kill() {
+void turnOff() {
     cbMotorReset(&motorL);
     cbMotorReset(&motorR);
     cbEncoderCancelISRs(&encoderL);
     cbEncoderCancelISRs(&encoderR);
     gpioTerminate();
 }
+void gpio_terminate() {
+    gpioTerminate();
+    
+}
 
 int main(){
     init();
-    atexit(kill);
+    atexit(gpio_terminate);
     task_t controlloL = {.entry_point=controllo};
     task_t controlloR = {.entry_point=controllo};
     controllo_args_t argsL = {
@@ -81,6 +85,7 @@ int main(){
     if (join_task(&controlloL) != 0) {
         failure("Failed to join left control task");
     }
+    
     if (join_task(&controlloR) != 0) {
         failure("Failed to join right control task");
     }
