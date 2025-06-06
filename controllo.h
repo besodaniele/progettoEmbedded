@@ -12,29 +12,30 @@
 
 extern pthread_mutex_t clamp_mutex;     //mutex di clamp counter
 
-float clamp(float dutyCycle,int* clamp_counter){
-        mutex_lock(&clamp_mutex);
+float clamp(float dutyCycle,int* clamp_counter, pthread_mutex_t* clamp_mutex) {
+        mutex_lock(clamp_mutex);
 
         if (*clamp_counter>=CLAMP_LIMIT){
-                mutex_unlock(&clamp_mutex);
+                mutex_unlock(clamp_mutex);
                 exit(EXIT_FAILURE);
         }
         if (dutyCycle > 1.0f) {
                 *(clamp_counter)++;
-                mutex_unlock(&clamp_mutex);
+                mutex_unlock(clamp_mutex);
                 return 1.0f;
         }
         else if (dutyCycle < 0.0f){
                 *(clamp_counter)++;
-                mutex_unlock(&clamp_mutex);
+                mutex_unlock(clamp_mutex);
                 return 0.1f;
         }
 
-        mutex_unlock(&clamp_mutex);
+        mutex_unlock(clamp_mutex);
         return dutyCycle;
 }
 
 typedef struct {
+        pthread_mutex_t* clamp_mutex; // mutex per il clamp counter
         float targetSpeed_mm_s;
         float dutyCycle;
         cbMotor_t* motor;
