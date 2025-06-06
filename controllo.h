@@ -36,7 +36,7 @@ float clamp(float dutyCycle,int* clamp_counter, pthread_mutex_t* clamp_mutex) {
 
 typedef struct {
         pthread_mutex_t* clamp_mutex; // mutex per il clamp counter
-        float targetSpeed_mm_s;
+        float* targetSpeed_mm_s;
         float dutyCycle;
         cbMotor_t* motor;
         cbEncoder_t* encoder;
@@ -47,7 +47,7 @@ void* controllo(void *args){
         controllo_args_t *controlArgs = (controllo_args_t *)args;
         cbMotor_t* motor = (controlArgs->motor);
         float dutyCycle = controlArgs->dutyCycle;
-        float targetSpeed_mm_s = controlArgs->targetSpeed_mm_s;
+        float* targetSpeed_mm_s = controlArgs->targetSpeed_mm_s;
         cbEncoder_t* encoder = (controlArgs->encoder);
         // da stabilire i valori
         int* clamp_counter = controlArgs->clamp_counter;
@@ -75,7 +75,7 @@ void* controllo(void *args){
 
                 speed = (travelledDistance / PERIOD) * 1000; // il periodo è in millisecondi, per avere la velocità in mm/s mi riporto ai secondi
 
-                error = targetSpeed_mm_s - speed;
+                error = *targetSpeed_mm_s - speed;
                 erroreAccumulato += error; //sorrenti dice che nell'integrale va considerato l'errore corrente, non so quanto mi convince
 
                 if(encoder->pin_a==PIN_ENCODER_LEFT_A){

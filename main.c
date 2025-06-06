@@ -8,7 +8,7 @@
 
 typedef struct motorEncoderPackage {
     cbMotor_t* motorR;
-    cbMotor_t* motorL;
+    cbMotor_t* motorL;  
     cbEncoder_t* encoderR;
     cbEncoder_t* encoderL;
 } motorEncoderPackage_t;
@@ -47,6 +47,13 @@ void gpio_terminate(){
 }
 int main(){
 
+
+	//mock target speed per task di controllo, verrà poi modificata dinamicamente da un task di controllo cartesiano
+	//la velocità è indipendente per i due motori, viene controllata individualmente per rientrare sul percorso desiderato
+	float targetSpeed_mm_sL = 1000.0f; // velocità di riferimento in mm/s
+	float targetSpeed_mm_sR = 1000.0f; // velocità di riferimento in mm/s
+
+
     pthread_mutex_t clamp_mutex = PTHREAD_MUTEX_INITIALIZER;    //inizializzo clamp_mutex
 
     cbMotor_t motorL = {PIN_LEFT_FORWARD, PIN_LEFT_BACKWARD, forward};
@@ -70,14 +77,14 @@ int main(){
     task_t controlloL = {.tid=0,.entry_point=controllo};
     task_t controlloR = {.tid=1,.entry_point=controllo};
     controllo_args_t argsL = {
-        .targetSpeed_mm_s = 1000.0f,
+        .targetSpeed_mm_s = &targetSpeed_mm_sL,
         .dutyCycle = 0.5f,
         .motor = &motorL,
         .encoder = &encoderL,
         .clamp_counter = &clamp_counter
     };
     controllo_args_t argsR = {
-        .targetSpeed_mm_s = 1000.0f,
+        .targetSpeed_mm_s = &targetSpeed_mm_sR,
         .dutyCycle = 0.5f,
         .motor = &motorR,
         .encoder = &encoderR,
@@ -107,9 +114,9 @@ int main(){
     }
     // Attendo il completamento dei task di controllo
     // e cancello il task di odometria
-        sleep(10);
-        cancel_task(&controlloL);
-        cancel_task(&controlloR);
+    sleep(10);
+    cancel_task(&controlloL);
+    cancel_task(&controlloR);
 
     if (join_task(&controlloL) != 0) {
         kill_robot(&package);
