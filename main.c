@@ -8,41 +8,41 @@
 
 pthread_mutex_t clamp_mutex = PTHREAD_MUTEX_INITIALIZER;    //inizializzo clamp_mutex
 typedef struct motorEncoderPackage{
-    cbMotor_t motorR,
-    cbMotor_t motorL,
-    cbEncoder_t encoderR,
-    cbEncoder_t encoderL;
-} motorEncoderPackage_t
+    cbMotor_t* motorR,
+    cbMotor_t* motorL,
+    cbEncoder_t* encoderR,
+    cbEncoder_t* encoderL;
+} motorEncoderPackage_t;
 
 
 void init(motorEncoderPackage_t *package) {
-        cbEncoder_t encoderL = package->encoderL;
-        cbEncoder_t encoderR = package->encoderR;
-        cbMotor_t motorL = package->motorL;
-        cbMotor_t motorR = package->motorR;
+        cbEncoder_t* encoderL = package->encoderL;
+        cbEncoder_t* encoderR = package->encoderR;
+        cbMotor_t* motorL = package->motorL;
+        cbMotor_t* motorR = package->motorR;
 
         if(gpioInitialise() < 0)
                 exit(EXIT_FAILURE);
         // Left
-        cbMotorGPIOinit(&motorL);
-        cbEncoderGPIOinit(&encoderL);
-        cbEncoderRegisterISRs(&encoderL, 50);
+        cbMotorGPIOinit(motorL);
+        cbEncoderGPIOinit(encoderL);
+        cbEncoderRegisterISRs(encoderL, 50);
         // Right
-        cbMotorGPIOinit(&motorR);
-        cbEncoderGPIOinit(&encoderR);
-        cbEncoderRegisterISRs(&encoderR, 50);
+        cbMotorGPIOinit(motorR);
+        cbEncoderGPIOinit(encoderR);
+        cbEncoderRegisterISRs(encoderR, 50);
 }
 void kill_robot(motorEncoderPackage_t *package) {
-    cbEncoder_t encoderL = package->encoderL;
-    cbEncoder_t encoderR = package->encoderR;
-    cbMotor_t motorL = package->motorL;
-    cbMotor_t motorR = package->motorR;
+    cbEncoder_t* encoderL = package->encoderL;
+    cbEncoder_t* encoderR = package->encoderR;
+    cbMotor_t* motorL = package->motorL;
+    cbMotor_t* motorR = package->motorR;
 
     puts("exiting");
-    cbMotorReset(&motorL);
-    cbMotorReset(&motorR);
-    cbEncoderCancelISRs(&encoderL);
-    cbEncoderCancelISRs(&encoderR);
+    cbMotorReset(motorL);
+    cbMotorReset(motorR);
+    cbEncoderCancelISRs(encoderL);
+    cbEncoderCancelISRs(encoderR);
 }
 void gpio_terminate(){
         gpioTerminate();
@@ -56,10 +56,10 @@ int main(){
     cbEncoder_t encoderR = {PIN_ENCODER_RIGHT_A, PIN_ENCODER_RIGHT_B, GPIO_PIN_NC, 0, 0, 0};
 
     motorEncoderPackage_t package = {
-        .motorR = motorR,
-        .motorL = motorL,
-        .encoderR = encoderR,
-        .encoderL = encoderL
+        .motorR = &motorR,
+        .motorL = &motorL,
+        .encoderR = &encoderR,
+        .encoderL = &encoderL
     };
 
     init(&package);
@@ -112,10 +112,8 @@ int main(){
         cancel_task(&controlloL);
         cancel_task(&controlloR);
 
-
-
     if (join_task(&controlloL) != 0) {
-        kill_robot($&package);
+        kill_robot(&package);
         failure("Failed to join left control task");
     }
     
@@ -124,10 +122,10 @@ int main(){
         kill_robot(&package);
     }
         kill_robot(&package);
-/*
+
     if (cancel_task(&odom) != 0) {
         failure("Failed to cancel odometry task");
     }
-*/
+
         exit(EXIT_SUCCESS);
 }
