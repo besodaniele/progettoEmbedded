@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "motor.h": "c"
+        "motor.h": "c",
+        "controllo.h": "c"
     }
 }
