@@ -6,7 +6,6 @@
 //#include "odometria.h"
 #include <pigpio.h>
 
-pthread_mutex_t clamp_mutex = PTHREAD_MUTEX_INITIALIZER;    //inizializzo clamp_mutex
 typedef struct motorEncoderPackage {
     cbMotor_t* motorR;
     cbMotor_t* motorL;
@@ -47,6 +46,8 @@ void gpio_terminate(){
         gpioTerminate();
 }
 int main(){
+
+    pthread_mutex_t clamp_mutex = PTHREAD_MUTEX_INITIALIZER;    //inizializzo clamp_mutex
 
     cbMotor_t motorL = {PIN_LEFT_FORWARD, PIN_LEFT_BACKWARD, forward};
     cbMotor_t motorR = {PIN_RIGHT_FORWARD, PIN_RIGHT_BACKWARD, forward};
@@ -120,7 +121,7 @@ int main(){
         kill_robot(&package);
     }
         kill_robot(&package);
-/*
+
     if (cancel_task(&odom) != 0) {
         failure("Failed to cancel odometry task");
     }
