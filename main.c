@@ -92,6 +92,7 @@ int main(){
         kill_robot();
         failure("Failed to join left control task");
     }
+    
     if (join_task(&controlloR) != 0) {
         failure("Failed to join right control task");
         kill_robot();

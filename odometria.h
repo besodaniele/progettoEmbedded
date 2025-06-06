@@ -83,7 +83,7 @@ void print_pose_info(double pose[4][4]) {
            roll * 180/M_PI, pitch * 180/M_PI, yaw * 180/M_PI);
 }
 
-void odometria(void* args){
+void* odometria(void* args){
     //set_sched_deadline(80*1000,15*1000,200*1000);
 
     odometria_args_t* odom_args = (odometria_args_t*)args;
