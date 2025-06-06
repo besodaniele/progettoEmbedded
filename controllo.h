@@ -20,12 +20,12 @@ float clamp(float dutyCycle,int* clamp_counter){
                 exit(EXIT_FAILURE);
         }
         if (dutyCycle > 1.0f) {
-                *clamp_counter++;
+                *(clamp_counter)++;
                 mutex_unlock(&clamp_mutex);
                 return 1.0f;
         }
         else if (dutyCycle < 0.0f){
-                *clamp_counter++;
+                *(clamp_counter)++;
                 mutex_unlock(&clamp_mutex);
                 return 0.1f;
         }
@@ -61,7 +61,7 @@ void* controllo(void *args){
         float speed = 0.0f;
         float error = 0.0f;
         float newDutyCycle = 0.0f;
-        float erroreAccumulatoL = 0.0f, erroreAccumulatoR = 0.0f;
+        float erroreAccumulato = 0.0f;
 
         cbDir_t direction=forward;
 
@@ -78,9 +78,9 @@ void* controllo(void *args){
                 speed = (travelledDistance / PERIOD) * 1000; // il periodo è in millisecondi, per avere la velocità in mm/s mi riporto ai secondi
 
                 error = targetSpeed_mm_s - speed;
-                erroreAccumulatoL += error; //sorrenti dice che nell'integrale va considerato l'errore corrente, non so quanto mi convince
+                erroreAccumulato += error; //sorrenti dice che nell'integrale va considerato l'errore corrente, non so quanto mi convince
 
-                newDutyCycle = KP*error + KI*erroreAccumulatoL;
+                newDutyCycle = KP*error + KI*erroreAccumulato;
                 newDutyCycle = fabs(newDutyCycle);
 
                 //controllo saturazione
