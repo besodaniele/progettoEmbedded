@@ -1,3 +1,5 @@
+#ifndef CONCURRENT_H
+#define CONCURRENT_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -9,6 +11,7 @@
 #include <sys/syscall.h>
 #include <linux/types.h>
 #include <sys/signal.h>
+
 struct sched_attr
 {
     __u32 size;           /* Size of this structure */
@@ -19,7 +22,7 @@ struct sched_attr
     __u32 sched_priority; /* Static priority (SCHED_FIFO,
                            SCHED_RR) */
     /* For SCHED_DEADLINE */
-    __u64 sched_runtime;
+    __u64 sched_runtime; //time in nanoseconds
     __u64 sched_deadline;
     __u64 sched_period;
 
@@ -39,6 +42,7 @@ void dl_miss_handler(int sig)
     puts("DEADLINE MISS!");
     fflush(stdout);
     (void)signal(SIGXCPU, SIG_DFL);
+    exit(EXIT_FAILURE);
 }
 
 int set_sched_deadline(uint64_t runtime_ns, uint64_t deadline_ns, uint64_t period_ns)
@@ -148,3 +152,4 @@ void failure(const char *msg)
     perror(msg);
     exit(EXIT_FAILURE);
 }
+#endif
