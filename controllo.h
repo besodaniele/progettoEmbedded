@@ -35,7 +35,6 @@ float clamp(float dutyCycle,int* clamp_counter){
 }
 
 typedef struct {
-        float goal_mm;
         float targetSpeed_mm_s;
         float dutyCycle;
         cbMotor_t* motor;
@@ -45,11 +44,10 @@ typedef struct {
 
 void* controllo(void *args){
         controllo_args_t *controlArgs = (controllo_args_t *)args;
-        float goal_mm = controlArgs->goal_mm;
-        cbMotor_t motor = *(controlArgs->motor);
+        cbMotor_t* motor = (controlArgs->motor);
         float dutyCycle = controlArgs->dutyCycle;
         float targetSpeed_mm_s = controlArgs->targetSpeed_mm_s;
-        cbEncoder_t encoder = *(controlArgs->encoder);
+        cbEncoder_t* encoder = (controlArgs->encoder);
         // da stabilire i valori
         int* clamp_counter = controlArgs->clamp_counter;
 
@@ -65,12 +63,11 @@ void* controllo(void *args){
 
         cbDir_t direction=forward;
 
-        cbMotorMove(&motor, direction, dutyCycle);
+        cbMotorMove(motor, direction, dutyCycle);
 
         while(1){
 
-                tick = encoder.ticks;
-                printf("%d\n",tick);
+                tick = encoder->ticks;
                 travelledDistance = (tick - prevTick)*mmsPerTick;
 
                 prevTick = tick;
@@ -80,9 +77,14 @@ void* controllo(void *args){
                 error = targetSpeed_mm_s - speed;
                 erroreAccumulato += error; //sorrenti dice che nell'integrale va considerato l'errore corrente, non so quanto mi convince
 
-                newDutyCycle = KP*error + KI*erroreAccumulato;
-                newDutyCycle = fabs(newDutyCycle);
+                if(encoder->pin_a==PIN_ENCODER_LEFT_A){
+                        newDutyCycle = KP_L*error + KI_L*erroreAccumulato;
 
+                }else if(encoder->pin_a==PIN_ENCODER_RIGHT_A){
+                        //sono nel destro
+                        newDutyCycle = KP_R*error + KI_R*erroreAccumulato;
+                }
+                newDutyCycle = fabs(newDutyCycle);
                 //controllo saturazione
                 newDutyCycle = clamp(newDutyCycle,clamp_counter);
                 // se errore positivo -> troppo lento
@@ -92,11 +94,8 @@ void* controllo(void *args){
                         direction = forward;
                 }else if (error < 0){
                         direction = backward;
-                        newDutyCycle = newDutyCycle *0.1f;
-                        newDutyCycle = clamp(newDutyCycle,clamp_counter);
                 }
-                cbMotorMove(&motor, direction, newDutyCycle);
-                goal_mm -= travelledDistance;
+                cbMotorMove(motor, direction, newDutyCycle);
                 pthread_testcancel();
                 sched_yield(); //segnalo allo scheduler che ho finito
         }
