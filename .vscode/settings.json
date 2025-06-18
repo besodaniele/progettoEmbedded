@@ -1,6 +1,14 @@
 {
     "files.associations": {
-        "motor.h": "c",
-        "controllo.h": "c"
-    }
+		"motor.h": "c",
+		"controllo.h": "c",
+		"encoder.h": "c",
+		"cbdef.h": "c"
+	},
+	"includePath": [
+		"${workspaceFolder}/**",
+		"/usr/include",
+		"/usr/local/include",
+		"/home/daniele/lab embedded coderbot/progettoEmbedded/include"
+	]
 }
